@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KABIR.EXE - Debug Your Mind</title>
+<meta name="description" content="An interactive literary project on two dohas of Kabir Das, framed through the language of debugging to add that pinch of engineering student's touch to it :).">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14120F;
+    --bg-alt:#1C1813;
+    --bg-card:#201B15;
+    --ink:#ECE6D8;
+    --ink-dim:#A6997F;
+    --ink-faint:#6E6353;
+    --thread:#D7943C;
+    --thread-bright:#E9AC5C;
+    --thread-dim:#7A4E1E;
+    --line:rgba(236,230,216,0.14);
+    --line-soft:rgba(236,230,216,0.08);
+    --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace;
+    --serif-en:'Noto Serif', Georgia, 'Times New Roman', serif;
+    --serif-dev:'Noto Serif Devanagari','Noto Serif', 'Nirmala UI', serif;
+    --maxw:740px;
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; background:var(--bg); }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--serif-en);
+    line-height:1.7;
+    font-size:17px;
+    -webkit-font-smoothing:antialiased;
+  }
+  img,svg{ display:block; max-width:100%; }
+  a{ color:var(--thread-bright); }
+  ::selection{ background:var(--thread-dim); color:var(--ink); }
+
+  .skip-link{
+    position:absolute; left:-999px; top:auto;
+    background:var(--thread); color:#14120F; padding:.6em 1em;
+    font-family:var(--mono); font-size:.85rem; z-index:200;
+  }
+  .skip-link:focus{ left:1rem; top:1rem; }
+
+  button, .btn, input[type="range"]{ font-family:var(--mono); }
+  button{
+    cursor:pointer;
+    background:transparent;
+    color:var(--ink);
+    border:1px solid var(--line);
+    font-size:.92rem;
+    padding:.75em 1.1em;
+    letter-spacing:.02em;
+    transition:border-color .2s ease, color .2s ease, background-color .2s ease;
+  }
+  button:hover:not(:disabled){ border-color:var(--thread); color:var(--thread-bright); }
+  button:disabled{ opacity:.4; cursor:default; }
+  :focus-visible{ outline:2px solid var(--thread); outline-offset:3px; }
+
+  /* ---------- fixed chrome ---------- */
+  .progress-thread{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg, var(--thread-dim), var(--thread-bright));
+    z-index:100; transition:width .08s linear;
+  }
+  .status-bar{
+    position:fixed; top:14px; right:16px; z-index:99;
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.06em;
+    color:var(--ink-dim); background:rgba(20,18,15,.72);
+    border:1px solid var(--line-soft); padding:.4em .7em;
+    backdrop-filter:blur(4px);
+    white-space:nowrap;
+  }
+  .status-bar span{ color:var(--thread-bright); }
+  @media (max-width:560px){ .status-bar{ font-size:.62rem; padding:.35em .55em; } }
+
+  /* ---------- shared layout ---------- */
+  main{ overflow:hidden; }
+  section{ padding:6.5rem 1.5rem; }
+  .wrap{ max-width:var(--maxw); margin:0 auto; }
+  .wrap-narrow{ max-width:560px; margin:0 auto; }
+
+  .eyebrow{
+    font-family:var(--mono); font-size:.78rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--thread); margin:0 0 1rem;
+  }
+  h1,h2,h3{ font-family:var(--serif-en); font-weight:600; line-height:1.25; margin:0 0 1rem; }
+  h2{ font-size:clamp(1.5rem,3.5vw,2rem); }
+  p{ margin:0 0 1.1em; color:var(--ink); }
+  .dim{ color:var(--ink-dim); }
+
+  .thread-divider{
+    display:flex; align-items:center; gap:.5rem;
+    max-width:var(--maxw); margin:0 auto; padding:0 1.5rem;
+  }
+  .thread-divider::before, .thread-divider::after{
+    content:""; flex:1; height:1px;
+    background:repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 12px);
+  }
+  .thread-divider .knot{
+    width:6px; height:6px; border-radius:50%; background:var(--thread-dim); flex:none;
+  }
+
+  /* ---------- landing ---------- */
+  .landing{
+    min-height:100svh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:2rem 1.5rem; position:relative;
+  }
+  .landing-title{
+    font-family:var(--mono); font-weight:700;
+    font-size:clamp(2.1rem,9vw,3.6rem);
+    letter-spacing:.02em; margin:0 0 .6rem;
+    color:var(--ink);
+  }
+  .landing-title .dot{ color:var(--thread); }
+  .landing-tag{
+    font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
+    font-size:1.05rem; margin:0 0 2.6rem;
+  }
+  .terminal{
+    font-family:var(--mono); font-size:.92rem; text-align:left;
+    color:var(--thread-bright); min-height:5.4em; margin-bottom:2rem;
+    max-width:420px; width:100%;
+  }
+  .terminal .line{ min-height:1.5em; opacity:.92; }
+  .terminal .cursor{
+    display:inline-block; width:.55em; height:1.05em; background:var(--thread-bright);
+    vertical-align:-2px; margin-left:2px; animation:blink 1s step-end infinite;
+  }
+  @keyframes blink{ 50%{ opacity:0; } }
+  .run-btn{
+    font-size:1rem; padding:.95em 1.7em; border-color:var(--thread-dim);
+    color:var(--thread-bright); opacity:0; transform:translateY(6px);
+    transition:opacity .5s ease, transform .5s ease, border-color .2s ease, background-color .2s ease;
+  }
+  .run-btn.ready{ opacity:1; transform:translateY(0); }
+  .run-btn:hover:not(:disabled){ background:var(--thread); color:#14120F; border-color:var(--thread); }
+  .scroll-hint{
+    position:absolute; bottom:1.6rem; font-family:var(--mono); font-size:.68rem;
+    letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase;
+  }
+
+  /* ---------- doha block ---------- */
+  .scenario-card{
+    background:var(--bg-card); border:1px solid var(--line-soft);
+    border-left:3px solid var(--thread-dim); padding:1.6rem 1.7rem; margin:1.6rem 0 1.8rem;
+  }
+  .scenario-card p{ margin:0; color:var(--ink); font-style:italic; }
+
+  .choice-row{ display:flex; flex-wrap:wrap; gap:.7rem; margin-bottom:2.4rem; }
+  .choice-row button{ flex:1 1 210px; text-align:left; }
+
+  .doha-reveal{
+    max-height:0; opacity:0; overflow:hidden;
+    transition:max-height .7s ease, opacity .8s ease;
+  }
+  .doha-reveal.open{ max-height:3000px; opacity:1; }
+
+  .doha-block{
+    background:var(--bg-card); border:1px solid var(--line-soft);
+    border-left:3px solid var(--thread); padding:2rem 1.8rem; margin:0 0 1.6rem;
+  }
+  .doha-text{
+    font-family:var(--serif-dev); font-size:clamp(1.25rem,3vw,1.55rem);
+    line-height:1.85; color:var(--ink); margin:0 0 1rem;
+  }
+  .doha-translit{
+    font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
+    font-size:.98rem; margin:0 0 1.6rem;
+  }
+  .doha-label{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--thread); margin:1.4rem 0 .5rem;
+  }
+  .doha-label:first-of-type{ margin-top:0; }
+
+  details.more{ margin:1.6rem 0; border:1px solid var(--line-soft); background:var(--bg-alt); }
+  details.more summary{
+    cursor:pointer; font-family:var(--mono); font-size:.82rem; letter-spacing:.04em;
+    padding:.9em 1.1em; color:var(--ink-dim); list-style:none;
+  }
+  details.more summary::-webkit-details-marker{ display:none; }
+  details.more summary::before{ content:"+ "; color:var(--thread); }
+  details.more[open] summary::before{ content:"– "; }
+  details.more .more-body{ padding:0 1.2rem 1.2rem; }
+
+  /* ---------- slider ---------- */
+  .slider-block{ margin:2.2rem 0 0; }
+  .slider-labels{
+    display:flex; justify-content:space-between; font-family:var(--mono);
+    font-size:.68rem; letter-spacing:.08em; color:var(--ink-faint); margin-top:.6rem;
+  }
+  input[type="range"]{
+    -webkit-appearance:none; width:100%; height:2px; background:var(--line);
+    outline-offset:6px;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:var(--thread); border:2px solid var(--bg); cursor:pointer;
+    box-shadow:0 0 0 1px var(--thread-dim);
+  }
+  input[type="range"]::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%; background:var(--thread);
+    border:2px solid var(--bg); cursor:pointer;
+  }
+  .slider-reflection{
+    font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
+    font-size:.94rem; margin-top:1.1rem; min-height:1.4em;
+  }
+
+  /* ---------- mirror section ---------- */
+  .mirror-section{ text-align:center; }
+  .mirror-svg{ margin:0 auto 2.2rem; width:180px; }
+  .mirror-svg .pulse{ animation:pulse 3.4s ease-in-out infinite; transform-origin:center; }
+  @keyframes pulse{ 0%,100%{ opacity:.55; transform:scale(1); } 50%{ opacity:.95; transform:scale(1.06); } }
+  .mirror-text{ font-family:var(--serif-en); font-style:italic; font-size:1.08rem; color:var(--ink); }
+  .mirror-text p{ font-style:italic; }
+
+  /* ---------- task card ---------- */
+  .task-card{
+    background:var(--bg-card); border:1px solid var(--line-soft); padding:1.8rem 1.8rem 1.6rem;
+    margin:1.8rem 0; font-family:var(--mono);
+  }
+  .task-row{ display:flex; justify-content:space-between; gap:1rem; padding:.5em 0; border-bottom:1px dashed var(--line-soft); font-size:.88rem; flex-wrap:wrap; }
+  .task-row:last-of-type{ border-bottom:none; }
+  .task-row .k{ color:var(--ink-faint); }
+  .task-row .v{ color:var(--ink); }
+  .status-pill{
+    display:inline-block; padding:.15em .6em; font-size:.78rem;
+    border:1px solid var(--thread-dim); color:var(--thread-bright);
+  }
+  .task-quote{
+    font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
+    margin:1.4rem 0 1.2rem; font-size:1.02rem;
+  }
+  .postpone-row{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+  .postpone-msg{ font-family:var(--mono); font-size:.85rem; color:var(--thread-bright); min-height:1.4em; }
+
+  /* ---------- manual ---------- */
+  .manual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
+  @media (max-width:600px){ .manual-grid{ grid-template-columns:1fr; } }
+  .manual-card{
+    background:var(--bg-card); border:1px solid var(--line-soft);
+    padding:1.5rem 1.4rem; text-align:left; width:100%;
+  }
+  .manual-card .tag{ font-family:var(--mono); font-size:.72rem; color:var(--thread); letter-spacing:.08em; }
+  .manual-card h3{ font-size:1.05rem; margin:.4rem 0 0; }
+  .manual-patch{
+    max-height:0; overflow:hidden; opacity:0; transition:max-height .5s ease, opacity .5s ease;
+  }
+  .manual-patch.open{ max-height:300px; opacity:1; margin-top:.9rem; }
+  .manual-patch .patch-label{ font-family:var(--mono); font-size:.72rem; color:var(--thread-bright); letter-spacing:.08em; }
+  .manual-patch p{ font-size:.92rem; margin:.35rem 0 0; color:var(--ink-dim); }
+
+  /* ---------- final diagnostic ---------- */
+  .final-section{ background:var(--bg-alt); }
+  .terminal-card{
+    background:#0F0D0A; border:1px solid var(--line); padding:2.2rem 1.8rem;
+    font-family:var(--mono); font-size:.92rem;
+  }
+  .terminal-card .tline{
+    opacity:0; transform:translateY(6px); transition:opacity .6s ease, transform .6s ease;
+    margin:0 0 .7em; color:var(--ink-dim);
+  }
+  .terminal-card .tline.show{ opacity:1; transform:translateY(0); }
+  .terminal-card .tline.prompt{ color:var(--thread); }
+  .terminal-card .tline strong{ color:var(--ink); }
+  .terminal-card .status-line{ color:var(--thread-bright); font-weight:700; margin:1.2em 0; }
+  .final-line{
+    font-family:var(--serif-en); font-style:italic; font-size:1.3rem;
+    color:var(--thread-bright); margin-top:1.6rem;
+  }
+
+  /* ---------- sources / credits ---------- */
+  .src-tag{
+    display:inline-block; font-family:var(--mono); font-size:.66rem; letter-spacing:.08em;
+    color:var(--ink-faint); border:1px solid var(--line-soft); padding:.15em .5em; margin-bottom:.5em;
+  }
+  .src-group{ margin-bottom:1.8rem; }
+  .src-group ul{ margin:.4rem 0 0; padding-left:1.1rem; }
+  .src-group li{ margin-bottom:.5rem; color:var(--ink-dim); font-size:.95rem; }
+  .credits-card{
+    background:var(--bg-card); border:1px solid var(--line-soft); padding:1.6rem 1.7rem;
+  }
+
+  footer{ padding:3rem 1.5rem 4rem; text-align:center; }
+  footer p{ font-family:var(--mono); font-size:.72rem; color:var(--ink-faint); letter-spacing:.04em; }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#why" class="skip-link">Skip to main content</a>
+<div class="progress-thread" id="progressThread"></div>
+<div class="status-bar" id="statusBar" aria-live="polite">KABIR.EXE &nbsp;·&nbsp; BUGS FOUND: <span id="bugCount">0</span>/2</div>
+
+<main>
+
+  <!-- LANDING -->
+  <section class="landing" id="landing">
+    <h1 class="landing-title">KABIR<span class="dot">.</span>EXE</h1>
+    <p class="landing-tag">Human behaviour requires debugging.</p>
+    <div class="terminal" id="terminal" aria-live="polite"></div>
+    <button class="run-btn" id="runBtn" disabled>[ RUN KABIR.EXE ]</button>
+    <span class="scroll-hint">scroll ↓</span>
+  </section>
+
+  <!-- SECTION 1 -->
+  <section id="why">
+    <div class="wrap">
+      <p class="eyebrow">01 - Why Kabir.exe?</p>
+      <h2>Debugging, but for the self</h2>
+      <p>We spend a surprising amount of time debugging code. A missing semicolon, a stray variable, a function that quietly does the wrong thing for weeks before anyone notices. We rarely spend the same amount of attention debugging ourselves.</p>
+      <p>Kabir did - almost about five hundred years before anyone wrote a line of code.</p>
+      <pKabir was a 15th-century poet-saint from Varanasi and one of the most important voices of North India’s Bhakti movement, particularly its Nirguna strand, which imagined the divine as formless rather than confined to an idol, temple, or scripture. What makes Kabir especially relevant to **Digital Cultures and New Media** is the way his ideas have travelled across changing forms of communication. His dohas, short two-line couplets, were created to be sung, spoken, memorised, and shared rather than simply read. **Oral culture was therefore his first medium:** his words moved from person to person and across religious communities, accumulating new contexts and interpretations before being written down. Today, those same verses continue to circulate through books, recordings, social media, videos, and digital archives. Kabir therefore offers a useful way to think about how culture survives and transforms as it moves between media-from oral transmission to print and, now, digital platforms.
+</p>
+      <p>This project isn't claiming Kabir predicted computers or thought in code - he didn't, and nothing here pretends otherwise. It's using a language a 21st-century engineering student like myself already understands - bugs, patches, system errors - as a way back into two of his dohas. The metaphor is a doorway. The dohas are the room. It's amazing how he dived deep into the concept of "introspecting/debugging ourselves" so to call it , THAT early on!</p>
+      <details class="more">
+        <summary>A note on Kabir's world</summary>
+        <div class="more-body">
+          <p>Kabir is usually placed in the Nirguna school of Bhakti poetry, which stood apart from Saguna traditions that worshipped a god with form and name, such as Rama or Krishna. His verses survive mainly through two forms: the <em>sakhi</em> or doha - a short, aphoristic couplet, like the two used in this project - and the <em>pada</em> or <em>bhajan</em>, a longer sung form. They were collected into anthologies such as the <em>Bijak</em>, sacred to the Kabir Panth, and the <em>Kabir Granthavali</em>, and some of his verses were later included in the Sikh scripture, the <em>Adi Granth</em>. Because the poems moved through oral, sung tradition for so long before being fixed on paper, small differences in wording exist across different printed collections - a point returned to in the Sources section below.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <div class="thread-divider"><span class="knot"></span></div>
+
+  <!-- SECTION 2: BUG 01 -->
+  <section id="bug01">
+    <div class="wrap">
+      <p class="eyebrow">Bug 01 - External blame</p>
+      <h2>You open your phone.</h2>
+      <div class="scenario-card">
+        <p>Someone from your batch just posted about an internship offer. You read it twice.</p>
+      </div>
+      <p class="dim">What's the first thing that crosses your mind?</p>
+      <div class="choice-row" id="choiceRow" role="group" aria-label="Choose your first reaction">
+        <button class="choice-btn" data-msg="Maybe. Or maybe that's just the fastest exit from actually looking at your own preparation.">They probably had connections.</button>
+        <button class="choice-btn" data-msg="Maybe. Or maybe that's the easier story too - it lets you admire from a safe distance without asking anything of yourself.">They are genuinely better prepared.</button>
+        <button class="choice-btn" data-msg="Fair. That's the harder, more honest answer - and the closest one to where this doha is headed.">I don't know enough to judge.</button>
+      </div>
+
+      <div class="doha-reveal" id="reveal-bug01">
+        <p id="choiceResponse" class="dim" style="font-style:italic;"></p>
+        <div class="doha-block">
+          <p class="doha-label">The text</p>
+          <p class="doha-text" lang="hi">बुरा जो देखन मैं चला, बुरा न मिलिया कोय।<br>जो दिल खोजा आपना, मुझसे बुरा न कोय॥</p>
+          <p class="doha-translit">Bura jo dekhan main chala, bura na miliya koye;<br>Jo dil khoja aapna, mujhse bura na koye.</p>
+
+          <p class="doha-label">Translation</p>
+          <p>"I went out looking for someone bad. I found no one. Then I looked inside my own heart - and found no one worse than myself."</p>
+
+          <p class="doha-label">Reading it</p>
+          <p>Kabir isn't saying everyone is secretly terrible. He's pointing at a specific reflex: it's far easier to locate a flaw in someone else's story than to sit with the discomfort of your own. The search in this doha starts outward - <em>bura jo dekhan main chala</em>, "I set out to see bad" - and only becomes honest once it turns inward. The couplet doesn't land on self-hatred; it lands on self-knowledge. That's a narrower, harder target than it sounds.</p>
+
+          <p class="doha-label">Modern life</p>
+          <p>"They probably had connections" is a comfortable sentence. It ends the investigation before it starts - if their success is about luck or access, it says nothing about you. Kabir's doha doesn't ask you to assume the best about the other person. It asks a harder question: what are you avoiding by deciding you already know the answer?</p>
+        </div>
+
+        <div class="slider-block">
+          <label for="judgeSlider" style="font-family:var(--mono); font-size:.85rem; color:var(--ink-dim);">How quickly do you judge someone online?</label>
+          <input type="range" id="judgeSlider" min="0" max="3" step="1" value="0">
+          <div class="slider-labels"><span>NEVER</span><span>TOO QUICKLY</span></div>
+          <p class="slider-reflection" id="sliderReflection" aria-live="polite"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 3: MIRROR -->
+  <section class="mirror-section" id="mirror">
+    <div class="wrap-narrow">
+      <svg class="mirror-svg" viewBox="0 0 160 120" aria-hidden="true">
+        <circle class="pulse" cx="80" cy="34" r="10" fill="none" stroke="#D7943C" stroke-width="1.4"/>
+        <line x1="15" y1="60" x2="145" y2="60" stroke="#6E6353" stroke-width="1"/>
+        <circle class="pulse" cx="80" cy="86" r="10" fill="none" stroke="#7A4E1E" stroke-width="1.4" opacity="0.55"/>
+      </svg>
+      <div class="mirror-text">
+        <p>Maybe the difficult part of Kabir's advice is not understanding it. It is applying it when we are convinced that the problem is someone else.</p>
+        <p>The first doha is easy to agree with in the abstract, and very hard to apply to the specific person you're irritated with right now. That gap - between nodding along and actually living inside the idea - is where the doha does its real work. Kabir isn't interested in whether you agreed. He's interested in what you do the next time you catch yourself building a case against someone else.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="thread-divider"><span class="knot"></span></div>
+
+  <!-- SECTION 4: BUG 02 -->
+  <section id="bug02">
+    <div class="wrap">
+      <p class="eyebrow">Bug 02 - Tomorrow</p>
+      <h2>One task. Infinite later.</h2>
+      <div class="task-card">
+        <div class="task-row"><span class="k">ASSIGNMENT</span><span class="v">Digital Systems Report</span></div>
+        <div class="task-row"><span class="k">DEADLINE</span><span class="v">Tomorrow, 11:59 PM</span></div>
+        <div class="task-row"><span class="k">STATUS</span><span class="v"><span class="status-pill">NOT STARTED</span></span></div>
+      </div>
+      <p class="task-quote" id="taskQuote">"I'll do it tonight."</p>
+      <div class="postpone-row">
+        <button id="postponeBtn">[ POSTPONE ]</button>
+        <span class="postpone-msg" id="postponeMsg"></span>
+      </div>
+
+      <div class="doha-reveal" id="reveal-bug02">
+        <p class="dim" style="font-style:italic; margin-top:1.8rem;">Kabir called this in the 15th century. No update has fixed it since.</p>
+        <div class="doha-block">
+          <p class="doha-label">The text</p>
+          <p class="doha-text" lang="hi">काल करे सो आज कर, आज करे सो अब।<br>पल में प्रलय होएगी, बहुरि करेगा कब॥</p>
+          <p class="doha-translit">Kaal kare so aaj kar, aaj kare so ab;<br>Pal mein pralaya hoegi, bahuri karega kab.</p>
+
+          <p class="doha-label">Translation</p>
+          <p>"What you'd do tomorrow, do today. What you'd do today, do now. Everything could end in an instant - and then when will you do it?"</p>
+
+          <p class="doha-label">Reading it</p>
+          <p>This isn't a productivity slogan. <em>Pralaya</em>, the word Kabir uses, means cosmic dissolution - the end of everything, not a missed deadline. He isn't telling you to optimise your schedule. He's pointing out that the certainty you're postponing on - the quiet assumption that "tonight" or "tomorrow" definitely exists - was never actually guaranteed. Everything built on top of that assumption, including the postponing itself, is standing on borrowed time.</p>
+
+          <p class="doha-label">Modern life</p>
+          <p>A report due tomorrow doesn't need cosmic dissolution to go wrong. A laptop dies. A friend needs you at 9 PM. The library wifi drops at 11:45. None of that requires an apocalypse - just the very ordinary fact that "later" is a guess, not a guarantee.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="thread-divider"><span class="knot"></span></div>
+
+  <!-- SECTION 5: MANUAL -->
+  <section id="manual">
+    <div class="wrap">
+      <p class="eyebrow">05 - Kabir's debugging manual</p>
+      <h2>Two bugs. Two patches.</h2>
+      <p class="dim">Click each entry.</p>
+      <div class="manual-grid">
+        <button class="manual-card" id="card1" aria-expanded="false">
+          <span class="tag">BUG 01</span>
+          <h3>Judging outwardly</h3>
+          <div class="manual-patch" id="patch1">
+            <p class="patch-label">Patch</p>
+            <p>Look inward. Before assigning a cause to someone else's outcome, ask what you're avoiding by not examining your own.</p>
+          </div>
+        </button>
+        <button class="manual-card" id="card2" aria-expanded="false">
+          <span class="tag">BUG 02</span>
+          <h3>Waiting endlessly</h3>
+          <div class="manual-patch" id="patch2">
+            <p class="patch-label">Patch</p>
+            <p>Act now. Treat "later" as a guess, not a guarantee - and do the smallest true version of the task today.</p>
+          </div>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 6: AI REFLECTION -->
+  <section id="ai-reflection">
+    <div class="wrap">
+      <p class="eyebrow">06 - But can AI actually understand Kabir?</p>
+      <h2>A question this project can't dodge</h2>
+      <p>This project itself was built partly with AI assistance, which raises an honest question: if a machine can explain what a 600-year-old couplet means, does that mean it understands the couplet?</p>
+      <p>Probably not, in the way that matters. AI can identify patterns across many interpretations of Kabir, compare translations, generate explanations, and arrange all of that into something interactive. What it can't do is feel the specific discomfort of realising, mid-argument, that you're doing exactly what Bug 01 describes. It has no tomorrow to postpone anything to, so Bug 02 doesn't really apply to it either. Understanding a doha like this seems to need something AI doesn't have: a life the idea can actually be tested against.</p>
+      <p>That's not a disclaimer added to sound humble. It's the actual reason this site ends the way it does - by handing the conclusion back to you instead of generating one for you.</p>
+    </div>
+  </section>
+
+  <!-- SECTION 7: FINAL DIAGNOSTIC -->
+  <section class="final-section" id="final">
+    <div class="wrap">
+      <p class="eyebrow">07 - Final diagnostic</p>
+      <div class="terminal-card" id="terminalCard">
+        <p class="tline prompt">KABIR.EXE - FINAL REPORT</p>
+        <p class="tline">&gt; Scan complete.</p>
+        <p class="tline"><strong>BUG 01:</strong> You may spend too much time looking outward.</p>
+        <p class="tline"><strong>BUG 02:</strong> You may spend too much time saying "tomorrow."</p>
+        <p class="tline status-line">SYSTEM STATUS: NOT FIXED</p>
+        <p class="tline">&gt; "Kabir.exe cannot fix you."</p>
+        <p class="tline">&gt; "It can only show you the bug."</p>
+        <p class="tline final-line">The debugging is yours.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOURCES -->
+  <section id="sources">
+    <div class="wrap">
+      <p class="eyebrow">Sources &amp; further reading</p>
+      <h2>References</h2>
+
+      <div class="src-group">
+        <span class="src-tag">PRIMARY</span>
+        <p>The two dohas belong to Kabir's orally transmitted couplet tradition (dohe / sakhis). No single manuscript is treated as a fixed "original" - his verses were sung and passed down before being compiled into anthologies such as the <em>Bijak</em> (sacred to the Kabir Panth) and the <em>Kabir Granthavali</em>, with some verses later included in the Sikh <em>Adi Granth</em>. Because of this, minor spelling variants exist across printed collections (for example मुझसे / मुझसा, and प्रलय / परलय in the second doha). The wording used on this site reflects the most commonly printed form of each couplet, checked against multiple modern anthologies.</p>
+      </div>
+
+      <div class="src-group">
+        <span class="src-tag">SECONDARY - LIFE &amp; CONTEXT</span>
+        <ul>
+          <li>"Kabir." <em>Encyclopaedia Britannica.</em> <a href="https://www.britannica.com/biography/Kabir-Indian-mystic-and-poet" target="_blank" rel="noopener">britannica.com/biography/Kabir-Indian-mystic-and-poet</a></li>
+          <li>"Kabir." <em>Poetry Foundation.</em> <a href="https://www.poetryfoundation.org/poets/kabir" target="_blank" rel="noopener">poetryfoundation.org/poets/kabir</a></li>
+        </ul>
+      </div>
+
+      <div class="src-group">
+        <span class="src-tag">SECONDARY - TRANSLATION &amp; SCHOLARSHIP</span>
+        <ul>
+          <li>Hess, Linda, and Sukhdev Singh, trans. <em>The Bijak of Kabir.</em> Oxford University Press, 2002.</li>
+          <li>Hess, Linda. "Kabir Says, Listen." <em>Inquiring Mind.</em> <a href="https://inquiringmind.com/article/2702_26_hess/" target="_blank" rel="noopener">inquiringmind.com/article/2702_26_hess</a> - on Kabir's dohas and their oral transmission.</li>
+        </ul>
+      </div>
+
+      <p class="dim" style="font-size:.92rem;">All translations, interpretations, and connections to modern student life on this site - the "Translation," "Reading it," and "Modern life" text under each doha - are original work written for this project, informed by but not copied from the sources above.</p>
+    </div>
+  </section>
+
+  <!-- AI CREDITS -->
+  <section id="ai-credits">
+    <div class="wrap">
+      <p class="eyebrow">AI &amp; creative tools</p>
+      <div class="credits-card">
+        <p>AI assistance (Claude, Anthropic) was used for: brainstorming the Kabir.exe concept and section structure, drafting and editing portions of the English copy, generating the HTML, CSS, and JavaScript for this site, and verifying the two dohas' wording and sourcing against reliable references online.</p>
+        <p>Decided and written by the student: the choice of poet and dohas, the overall concept connecting debugging to self-examination and procrastination, the specific interactive mechanics (the judgment scenario, the slider, the postpone button, the debugging manual, the final diagnostic), the literary interpretations connecting each doha to modern student life, and all final edits to structure and wording.</p>
+        <p class="dim" style="margin-bottom:0;">No part of this project claims Kabir wrote about technology, and no quotation or translation here has been fabricated - everything has been checked against the sources listed above.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>KABIR.EXE - an interactive literature project on two dohas of Kabir Das.</p>
+  </footer>
+
+</main>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- progress thread + status bar ---------- */
+  var progressEl = document.getElementById('progressThread');
+  function updateProgress () {
+    var h = document.documentElement;
+    var scrollable = h.scrollHeight - h.clientHeight;
+    var pct = scrollable > 0 ? (h.scrollTop || document.body.scrollTop) / scrollable * 100 : 0;
+    progressEl.style.width = pct + '%';
+  }
+  document.addEventListener('scroll', updateProgress, { passive: true });
+  updateProgress();
+
+  var bugCountEl = document.getElementById('bugCount');
+  var bugsFound = 0;
+  function markBugFound () {
+    bugsFound = Math.min(2, bugsFound + 1);
+    bugCountEl.textContent = bugsFound;
+  }
+
+  /* ---------- landing terminal ---------- */
+  var terminalEl = document.getElementById('terminal');
+  var runBtn = document.getElementById('runBtn');
+  var lines = ['Initialising...', 'Scanning behaviour...', '2 issues detected.'];
+
+  function typeLines (lines, onDone) {
+    var lineIndex = 0;
+    function nextLine () {
+      if (lineIndex >= lines.length) { onDone(); return; }
+      var p = document.createElement('div');
+      p.className = 'line';
+      terminalEl.appendChild(p);
+      var text = lines[lineIndex];
+      var charIndex = 0;
+      function typeChar () {
+        if (charIndex <= text.length) {
+          p.textContent = text.slice(0, charIndex);
+          charIndex++;
+          setTimeout(typeChar, 26);
+        } else {
+          lineIndex++;
+          setTimeout(nextLine, 380);
+        }
+      }
+      typeChar();
+    }
+    nextLine();
+  }
+
+  if (reduceMotion) {
+    lines.forEach(function (t) {
+      var p = document.createElement('div');
+      p.className = 'line';
+      p.textContent = t;
+      terminalEl.appendChild(p);
+    });
+    runBtn.disabled = false;
+    runBtn.classList.add('ready');
+  } else {
+    var cursor = document.createElement('span');
+    cursor.className = 'cursor';
+    terminalEl.appendChild(cursor);
+    typeLines(lines, function () {
+      runBtn.disabled = false;
+      runBtn.classList.add('ready');
+    });
+  }
+
+  runBtn.addEventListener('click', function () {
+    var target = document.getElementById('why');
+    if (target) target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth' });
+  });
+
+  /* ---------- bug 01: choice + doha reveal ---------- */
+  var choiceRow = document.getElementById('choiceRow');
+  var reveal01 = document.getElementById('reveal-bug01');
+  var choiceResponse = document.getElementById('choiceResponse');
+  var bug01Revealed = false;
+
+  choiceRow.addEventListener('click', function (e) {
+    var btn = e.target.closest('.choice-btn');
+    if (!btn) return;
+    Array.prototype.forEach.call(choiceRow.querySelectorAll('button'), function (b) { b.disabled = true; });
+    choiceResponse.textContent = btn.getAttribute('data-msg');
+    reveal01.classList.add('open');
+    if (!bug01Revealed) { bug01Revealed = true; markBugFound(); }
+  });
+
+  /* ---------- slider ---------- */
+  var slider = document.getElementById('judgeSlider');
+  var sliderReflection = document.getElementById('sliderReflection');
+  var sliderMessages = [
+    'Rarely - you tend to wait for more of the story.',
+    'Sometimes, especially when you\'re tired.',
+    'Faster than you\'d probably like to admit.',
+    'Before you finish reading the first line.'
+  ];
+  var sliderTouched = false;
+  slider.addEventListener('change', function () {
+    sliderReflection.textContent = sliderMessages[slider.value] + ' No score attached to that - Kabir\'s whole doha is just: notice.';
+    sliderTouched = true;
+  });
+
+  /* ---------- bug 02: postpone + doha reveal ---------- */
+  var postponeBtn = document.getElementById('postponeBtn');
+  var postponeMsg = document.getElementById('postponeMsg');
+  var taskQuote = document.getElementById('taskQuote');
+  var reveal02 = document.getElementById('reveal-bug02');
+  var postponeMessages = [
+    'Deadline approaching...',
+    'Still not started.',
+    'Procrastination detected.',
+    'Scan complete. Revealing relevant doha.'
+  ];
+  var postponeCount = 0;
+  postponeBtn.addEventListener('click', function () {
+    postponeMsg.textContent = postponeMessages[postponeCount];
+    postponeCount++;
+    if (postponeCount >= postponeMessages.length) {
+      postponeBtn.disabled = true;
+      taskQuote.textContent = '"...tomorrow, probably."';
+      reveal02.classList.add('open');
+      markBugFound();
+    } else {
+      taskQuote.style.opacity = '0.55';
+      setTimeout(function () { taskQuote.style.opacity = '1'; }, 200);
+    }
+  });
+
+  /* ---------- manual cards ---------- */
+  function wireCard (cardId, patchId) {
+    var card = document.getElementById(cardId);
+    var patch = document.getElementById(patchId);
+    card.addEventListener('click', function () {
+      var open = patch.classList.toggle('open');
+      card.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+  }
+  wireCard('card1', 'patch1');
+  wireCard('card2', 'patch2');
+
+  /* ---------- final diagnostic staged reveal ---------- */
+  var terminalCard = document.getElementById('terminalCard');
+  var tlines = terminalCard.querySelectorAll('.tline');
+  var finalPlayed = false;
+  function playFinal () {
+    if (finalPlayed) return;
+    finalPlayed = true;
+    if (reduceMotion) {
+      tlines.forEach(function (l) { l.classList.add('show'); });
+      return;
+    }
+    tlines.forEach(function (l, i) {
+      setTimeout(function () { l.classList.add('show'); }, i * 420);
+    });
+  }
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) { playFinal(); obs.disconnect(); }
+      });
+    }, { threshold: 0.4 });
+    obs.observe(terminalCard);
+  } else {
+    playFinal();
+  }
+});
+</script>
+
+</body>
+</html>
