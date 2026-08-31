@@ -339,6 +339,12 @@
   <section class="landing" id="landing">
     <h1 class="landing-title">KABIR<span class="dot">.</span>EXE</h1>
     <p class="landing-tag">Human behaviour requires debugging.</p>
+
+<div class="student-info">
+  <div>NAME: <span>Ananya Pawar</span></div>
+  <div>ROLL NO: <span>24110037</span></div>
+  <div>BRANCH: <span>B.Tech Third Year in Electrical Engineering (IC Design and Technology)</span></div>
+</div>
     <div class="terminal" id="terminal" aria-live="polite"></div>
     <button class="run-btn" id="runBtn" disabled>[ RUN KABIR.EXE ]</button>
     <span class="scroll-hint">scroll ↓</span>
