@@ -4,23 +4,30 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KABIR.EXE - Debug Your Mind</title>
-<meta name="description" content="An interactive literary project on two dohas of Kabir Das, framed through the language of debugging to add that pinch of engineering student's touch to it :).">
+<meta name="description" content="An interactive literary project on two dohas of Kabir Das, framed through the language of debugging.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Devanagari:wght@400;600;700&family=Noto+Serif:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#14120F;
-    --bg-alt:#1C1813;
-    --bg-card:#201B15;
-    --ink:#ECE6D8;
-    --ink-dim:#A6997F;
-    --ink-faint:#6E6353;
-    --thread:#D7943C;
-    --thread-bright:#E9AC5C;
-    --thread-dim:#7A4E1E;
-    --line:rgba(236,230,216,0.14);
-    --line-soft:rgba(236,230,216,0.08);
+    --bg:#1B1420;
+    --bg-alt:#241A28;
+    --bg-card:#2A1E30;
+    --ink:#F3EAD9;
+    --ink-dim:#BBAC98;
+    --ink-faint:#7C6E78;
+    --thread:#F2A93C;
+    --thread-bright:#FFC168;
+    --thread-dim:#9C6A1E;
+    --vermilion:#E85C4A;
+    --vermilion-bright:#FF8269;
+    --vermilion-dim:#8C3527;
+    --indigo:#6E93B8;
+    --indigo-bright:#9CC3EA;
+    --indigo-dim:#3C5670;
+    --line:rgba(243,234,217,0.14);
+    --line-soft:rgba(243,234,217,0.08);
+    --grid-line:rgba(243,234,217,0.045);
     --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', Consolas, 'Courier New', monospace;
     --serif-en:'Noto Serif', Georgia, 'Times New Roman', serif;
     --serif-dev:'Noto Serif Devanagari','Noto Serif', 'Nirmala UI', serif;
@@ -31,7 +38,12 @@
   html{ scroll-behavior:smooth; background:var(--bg); }
   body{
     margin:0;
-    background:var(--bg);
+    background-color:var(--bg);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size:34px 34px;
+    background-attachment:fixed;
     color:var(--ink);
     font-family:var(--serif-en);
     line-height:1.7;
@@ -44,7 +56,7 @@
 
   .skip-link{
     position:absolute; left:-999px; top:auto;
-    background:var(--thread); color:#14120F; padding:.6em 1em;
+    background:var(--thread); color:#1B1420; padding:.6em 1em;
     font-family:var(--mono); font-size:.85rem; z-index:200;
   }
   .skip-link:focus{ left:1rem; top:1rem; }
@@ -67,13 +79,13 @@
   /* ---------- fixed chrome ---------- */
   .progress-thread{
     position:fixed; top:0; left:0; height:3px; width:0%;
-    background:linear-gradient(90deg, var(--thread-dim), var(--thread-bright));
+    background:linear-gradient(90deg, var(--thread-dim), var(--vermilion), var(--thread-bright));
     z-index:100; transition:width .08s linear;
   }
   .status-bar{
     position:fixed; top:14px; right:16px; z-index:99;
     font-family:var(--mono); font-size:.72rem; letter-spacing:.06em;
-    color:var(--ink-dim); background:rgba(20,18,15,.72);
+    color:var(--ink-dim); background:rgba(27,20,32,.78);
     border:1px solid var(--line-soft); padding:.4em .7em;
     backdrop-filter:blur(4px);
     white-space:nowrap;
@@ -119,8 +131,11 @@
     font-size:clamp(2.1rem,9vw,3.6rem);
     letter-spacing:.02em; margin:0 0 .6rem;
     color:var(--ink);
+    background:linear-gradient(100deg, var(--thread-bright) 10%, var(--vermilion-bright) 90%);
+    -webkit-background-clip:text; background-clip:text;
+    -webkit-text-fill-color:transparent;
   }
-  .landing-title .dot{ color:var(--thread); }
+  .landing-title .dot{ -webkit-text-fill-color:var(--vermilion-bright); color:var(--vermilion-bright); }
   .landing-tag{
     font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
     font-size:1.05rem; margin:0 0 2.6rem;
@@ -142,7 +157,10 @@
     transition:opacity .5s ease, transform .5s ease, border-color .2s ease, background-color .2s ease;
   }
   .run-btn.ready{ opacity:1; transform:translateY(0); }
-  .run-btn:hover:not(:disabled){ background:var(--thread); color:#14120F; border-color:var(--thread); }
+  .run-btn:hover:not(:disabled){
+    background:linear-gradient(100deg, var(--thread), var(--vermilion));
+    color:#1B1420; border-color:var(--thread);
+  }
   .scroll-hint{
     position:absolute; bottom:1.6rem; font-family:var(--mono); font-size:.68rem;
     letter-spacing:.1em; color:var(--ink-faint); text-transform:uppercase;
@@ -151,7 +169,7 @@
   /* ---------- doha block ---------- */
   .scenario-card{
     background:var(--bg-card); border:1px solid var(--line-soft);
-    border-left:3px solid var(--thread-dim); padding:1.6rem 1.7rem; margin:1.6rem 0 1.8rem;
+    border-left:3px solid var(--vermilion-dim); padding:1.6rem 1.7rem; margin:1.6rem 0 1.8rem;
   }
   .scenario-card p{ margin:0; color:var(--ink); font-style:italic; }
 
@@ -167,6 +185,7 @@
   .doha-block{
     background:var(--bg-card); border:1px solid var(--line-soft);
     border-left:3px solid var(--thread); padding:2rem 1.8rem; margin:0 0 1.6rem;
+    box-shadow:0 10px 34px -18px rgba(242,169,60,0.28);
   }
   .doha-text{
     font-family:var(--serif-dev); font-size:clamp(1.25rem,3vw,1.55rem);
@@ -217,16 +236,25 @@
   }
 
   /* ---------- mirror section ---------- */
-  .mirror-section{ text-align:center; }
+  .mirror-section{
+    text-align:center;
+    background:linear-gradient(180deg, var(--bg-alt), var(--bg));
+    border-top:1px solid var(--indigo-dim);
+    border-bottom:1px solid var(--indigo-dim);
+  }
   .mirror-svg{ margin:0 auto 2.2rem; width:180px; }
   .mirror-svg .pulse{ animation:pulse 3.4s ease-in-out infinite; transform-origin:center; }
+  .mirror-svg .ring-a{ stroke:var(--indigo-bright); }
+  .mirror-svg .ring-b{ stroke:var(--indigo-dim); }
+  .mirror-svg .divider-line{ stroke:var(--ink-faint); }
   @keyframes pulse{ 0%,100%{ opacity:.55; transform:scale(1); } 50%{ opacity:.95; transform:scale(1.06); } }
   .mirror-text{ font-family:var(--serif-en); font-style:italic; font-size:1.08rem; color:var(--ink); }
   .mirror-text p{ font-style:italic; }
 
   /* ---------- task card ---------- */
   .task-card{
-    background:var(--bg-card); border:1px solid var(--line-soft); padding:1.8rem 1.8rem 1.6rem;
+    background:var(--bg-card); border:1px solid var(--line-soft);
+    border-left:3px solid var(--vermilion-dim); padding:1.8rem 1.8rem 1.6rem;
     margin:1.8rem 0; font-family:var(--mono);
   }
   .task-row{ display:flex; justify-content:space-between; gap:1rem; padding:.5em 0; border-bottom:1px dashed var(--line-soft); font-size:.88rem; flex-wrap:wrap; }
@@ -235,14 +263,14 @@
   .task-row .v{ color:var(--ink); }
   .status-pill{
     display:inline-block; padding:.15em .6em; font-size:.78rem;
-    border:1px solid var(--thread-dim); color:var(--thread-bright);
+    border:1px solid var(--vermilion-dim); color:var(--vermilion-bright);
   }
   .task-quote{
     font-family:var(--serif-en); font-style:italic; color:var(--ink-dim);
     margin:1.4rem 0 1.2rem; font-size:1.02rem;
   }
   .postpone-row{ display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
-  .postpone-msg{ font-family:var(--mono); font-size:.85rem; color:var(--thread-bright); min-height:1.4em; }
+  .postpone-msg{ font-family:var(--mono); font-size:.85rem; color:var(--vermilion-bright); min-height:1.4em; }
 
   /* ---------- manual ---------- */
   .manual-grid{ display:grid; grid-template-columns:1fr 1fr; gap:1.2rem; }
@@ -251,7 +279,7 @@
     background:var(--bg-card); border:1px solid var(--line-soft);
     padding:1.5rem 1.4rem; text-align:left; width:100%;
   }
-  .manual-card .tag{ font-family:var(--mono); font-size:.72rem; color:var(--thread); letter-spacing:.08em; }
+  .manual-card .tag{ font-family:var(--mono); font-size:.72rem; color:var(--vermilion-bright); letter-spacing:.08em; }
   .manual-card h3{ font-size:1.05rem; margin:.4rem 0 0; }
   .manual-patch{
     max-height:0; overflow:hidden; opacity:0; transition:max-height .5s ease, opacity .5s ease;
@@ -273,7 +301,7 @@
   .terminal-card .tline.show{ opacity:1; transform:translateY(0); }
   .terminal-card .tline.prompt{ color:var(--thread); }
   .terminal-card .tline strong{ color:var(--ink); }
-  .terminal-card .status-line{ color:var(--thread-bright); font-weight:700; margin:1.2em 0; }
+  .terminal-card .status-line{ color:var(--vermilion-bright); font-weight:700; margin:1.2em 0; }
   .final-line{
     font-family:var(--serif-en); font-style:italic; font-size:1.3rem;
     color:var(--thread-bright); margin-top:1.6rem;
@@ -321,15 +349,15 @@
     <div class="wrap">
       <p class="eyebrow">01 - Why Kabir.exe?</p>
       <h2>Debugging, but for the self</h2>
-      <p>We spend a surprising amount of time debugging code. A missing semicolon, a stray variable, a function that quietly does the wrong thing for weeks before anyone notices. We rarely spend the same amount of attention debugging ourselves.</p>
-      <p>Kabir did - almost about five hundred years before anyone wrote a line of code.</p>
-      <p>Kabir was a 15th-century poet-saint from Varanasi and one of the most important voices of North India’s Bhakti movement, particularly its Nirguna strand, which imagined the divine as formless rather than confined to an idol, temple, or scripture. What makes Kabir especially relevant to **Digital Cultures and New Media** is the way his ideas have travelled across changing forms of communication. His dohas, short two-line couplets, were created to be sung, spoken, memorised, and shared rather than simply read. **Oral culture was therefore his first medium:** his words moved from person to person and across religious communities, accumulating new contexts and interpretations before being written down. Today, those same verses continue to circulate through books, recordings, social media, videos, and digital archives. Kabir therefore offers a useful way to think about how culture survives and transforms as it moves between media-from oral transmission to print and, now, digital platforms.
-</p>
-      <p>This project isn't claiming Kabir predicted computers or thought in code - he didn't, and nothing here pretends otherwise. It's using a language a 21st-century engineering student like myself already understands - bugs, patches, system errors - as a way back into two of his dohas. The metaphor is a doorway. The dohas are the room. It's amazing how he dived deep into the concept of "introspecting/debugging ourselves" so to call it , THAT early on!</p>
+      <p>Being an undergrad engineering in making, I thought I should give this twist of mine and put forth my perspective in my own way !
+We spend a surprising amount of time debugging code. A missing semicolon, a stray variable, a function that quietly does the wrong thing for weeks before anyone notices. We rarely spend the same amount of attention debugging ourselves.</p>
+      <p>Kabir did - five hundred years before anyone wrote a line of code.</p>
+      <p>Kabir was a 15th-century poet-saint from Varanasi, one of the most important voices of North India's Bhakti movement, and of its Nirguna strand in particular, which imagined the divine as formless rather than housed in one idol, temple, or scripture. Almost nothing about his early life is settled fact - even his birth and death years are disputed. What survives with more certainty is his voice: blunt, funny, and impossible to file neatly under one religion. His dohas, two-line couplets, were composed to be sung and remembered, not printed, and they travelled through Hindu, Muslim, and later Sikh communities for centuries before they were ever written down.</p>
+      <p>This project isn't claiming Kabir predicted computers or thought in code - he didn't, and nothing here pretends otherwise. It's using a language a 21st-century engineering student already understands - bugs, patches, system errors - as a way back into two of his dohas. The metaphor is a doorway. The dohas are the room.</p>
       <details class="more">
         <summary>A note on Kabir's world</summary>
         <div class="more-body">
-          <p>Kabir is usually placed in the Nirguna school of Bhakti poetry, which stood apart from Saguna traditions that worshipped a god with form and name, such as Rama or Krishna. His verses survive mainly through two forms: the <em>sakhi</em> or doha - a short, aphoristic couplet, like the two used in this project - and the <em>pada</em> or <em>bhajan</em>, a longer sung form. They were collected into anthologies such as the <em>Bijak</em>, sacred to the Kabir Panth, and the <em>Kabir Granthavali</em>, and some of his verses were later included in the Sikh scripture, the <em>Adi Granth</em>. Because the poems moved through oral, sung tradition for so long before being fixed on paper, small differences in wording exist across different printed collections - a point returned to in the Sources section below.</p>
+          <p>Kabir is usually placed in the Nirguna school of Bhakti poetry, which stood apart from Saguna traditions that worshipped a god with form and name, such as Rama or Krishna. He rejected idol worship, caste hierarchy.His verses survive mainly through two forms: the <em>sakhi</em> or doha - a short, aphoristic couplet, like the two used in this project - and the <em>pada</em> or <em>bhajan</em>, a longer sung form. They were collected into anthologies such as the <em>Bijak</em>, sacred to the Kabir Panth, and the <em>Kabir Granthavali</em>, and some of his verses were later included in the Sikh scripture, the <em>Adi Granth</em>. Because the poems moved through oral, sung tradition for so long before being fixed on paper, small differences in wording exist across different printed collections - a point returned to in the Sources section below.</p>
         </div>
       </details>
     </div>
@@ -383,9 +411,9 @@
   <section class="mirror-section" id="mirror">
     <div class="wrap-narrow">
       <svg class="mirror-svg" viewBox="0 0 160 120" aria-hidden="true">
-        <circle class="pulse" cx="80" cy="34" r="10" fill="none" stroke="#D7943C" stroke-width="1.4"/>
-        <line x1="15" y1="60" x2="145" y2="60" stroke="#6E6353" stroke-width="1"/>
-        <circle class="pulse" cx="80" cy="86" r="10" fill="none" stroke="#7A4E1E" stroke-width="1.4" opacity="0.55"/>
+        <circle class="pulse ring-a" cx="80" cy="34" r="10" fill="none" stroke-width="1.4"/>
+        <line class="divider-line" x1="15" y1="60" x2="145" y2="60" stroke-width="1"/>
+        <circle class="pulse ring-b" cx="80" cy="86" r="10" fill="none" stroke-width="1.4" opacity="0.6"/>
       </svg>
       <div class="mirror-text">
         <p>Maybe the difficult part of Kabir's advice is not understanding it. It is applying it when we are convinced that the problem is someone else.</p>
@@ -468,7 +496,6 @@
       <h2>A question this project can't dodge</h2>
       <p>This project itself was built partly with AI assistance, which raises an honest question: if a machine can explain what a 600-year-old couplet means, does that mean it understands the couplet?</p>
       <p>Probably not, in the way that matters. AI can identify patterns across many interpretations of Kabir, compare translations, generate explanations, and arrange all of that into something interactive. What it can't do is feel the specific discomfort of realising, mid-argument, that you're doing exactly what Bug 01 describes. It has no tomorrow to postpone anything to, so Bug 02 doesn't really apply to it either. Understanding a doha like this seems to need something AI doesn't have: a life the idea can actually be tested against.</p>
-      <p>That's not a disclaimer added to sound humble. It's the actual reason this site ends the way it does - by handing the conclusion back to you instead of generating one for you.</p>
     </div>
   </section>
 
@@ -480,11 +507,11 @@
         <p class="tline prompt">KABIR.EXE - FINAL REPORT</p>
         <p class="tline">&gt; Scan complete.</p>
         <p class="tline"><strong>BUG 01:</strong> You may spend too much time looking outward.</p>
-        <p class="tline"><strong>BUG 02:</strong> You may spend too much time saying "tomorrow."</p>
+        <p class="tline"><strong>BUG 02:</strong> You may spend too much time saying "I'll do it tomorrow."</p>
         <p class="tline status-line">SYSTEM STATUS: NOT FIXED</p>
         <p class="tline">&gt; "Kabir.exe cannot fix you."</p>
         <p class="tline">&gt; "It can only show you the bug."</p>
-        <p class="tline final-line">The debugging is yours.</p>
+        <p class="tline final-line">The debugging is yours. It's all upto you !</p>
       </div>
     </div>
   </section>
@@ -526,14 +553,14 @@
       <p class="eyebrow">AI &amp; creative tools</p>
       <div class="credits-card">
         <p>AI assistance (Claude, Anthropic) was used for: brainstorming the Kabir.exe concept and section structure, drafting and editing portions of the English copy, generating the HTML, CSS, and JavaScript for this site, and verifying the two dohas' wording and sourcing against reliable references online.</p>
-        <p>Decided and written by the student: the choice of poet and dohas, the overall concept connecting debugging to self-examination and procrastination, the specific interactive mechanics (the judgment scenario, the slider, the postpone button, the debugging manual, the final diagnostic), the literary interpretations connecting each doha to modern student life, and all final edits to structure and wording.</p>
-        <p class="dim" style="margin-bottom:0;">No part of this project claims Kabir wrote about technology, and no quotation or translation here has been fabricated - everything has been checked against the sources listed above.</p>
+        <p>Decided and written by me (Ananya Pawar) : the choice of poet and dohas, the overall concept connecting debugging to self-examination and procrastination, the specific interactive mechanics (the judgment scenario, the slider, the postpone button, the debugging manual, the final diagnostic), the literary interpretations connecting each doha to modern student life, and all final edits to structure and wording.</p>
+        <p class="dim" style="margin-bottom:0;">No part of this project claims Kabir wrote about technology, and no quotation or translation here has been fabricated.</p>
       </div>
     </div>
   </section>
 
   <footer>
-    <p>KABIR.EXE - an interactive literature project on two dohas of Kabir Das.</p>
+    <p>KABIR.EXE - an interactive literature project on two dohas of Kabir Das from the lens of an undergrad engineering student.</p>
   </footer>
 
 </main>
